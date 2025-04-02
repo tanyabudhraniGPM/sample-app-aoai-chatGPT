@@ -33,6 +33,9 @@ jobs:
     needs: build  # Ensure that the build step runs first
     runs-on: ubuntu-latest
 
+    permissions:
+      id-token: write  # Add this to ensure GitHub Actions can get the ID token
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -40,10 +43,8 @@ jobs:
     - name: Set up Azure login
       uses: azure/login@v1
       with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}  # Azure client ID
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}  # Azure tenant ID
-        client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}  # Azure client secret
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}  # Azure subscription ID
+        auth-type: 'SERVICE-PRINCIPAL'  # Set auth-type to service-principal
+        creds: ${{ secrets.AZURE_CREDENTIALS }}  # Use a single secret for the service principal credentials in JSON format
 
     - name: Set up Azure Publish Profile
       uses: Azure/webapps-deploy@v2
