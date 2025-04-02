@@ -1,46 +1,39 @@
-name: Build and Deploy Frontend to Azure
+name: Build and Deploy to Azure
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
-    
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
-    strategy:
-      matrix:
-        node-version: [14.x, 16.x, 18.x, 21.x]
-    
-    steps:
-    - uses: actions/checkout@v3
+    branches:
+      - main
 
-    # Set up Node.js with caching
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
       with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-        cache-dependency-path: '**/package-lock.json'
-    
-    # Install dependencies
+        node-version: '16'
+
     - run: npm ci
-    
-    # Build frontend
     - run: NODE_OPTIONS=--max_old_space_size=8192 npm run build --if-present
 
-    # Run tests (optional)
-    - run: npm run test --if-present
+  deploy:
+    needs: build  # Ensure that the build step runs first
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-    # Deploy to Azure App Service
-    - name: Deploy to Azure Web App
-      uses: azure/webapps-deploy@v2
+    - name: Set up Azure Publish Profile
+      uses: Azure/webapps-deploy@v2
       with:
-        app-name: AskWenBot2  # 👈 your actual App Service name in Azure
-        slot-name: production  # 👈 use 'production' or your custom slot name
-        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}  # Add publish profile as secret
-        package: ./frontend/build  # Adjust this path if needed to point to the build output folder
+        app-name: "AskWenBot2"  # This should be your Azure app name
+        publish-profile: ${{ secrets.AZUREAPP_SERVICE_PUBLISHPROFILE }}  # Use the secret for authentication
+        package: ./frontend  # Path to your frontend build directory
