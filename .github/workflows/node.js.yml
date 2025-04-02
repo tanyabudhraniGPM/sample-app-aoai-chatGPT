@@ -19,7 +19,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '16'
+        node-version: '16'  # Use Node.js version 16
 
     - name: Install dependencies
       run: npm ci
@@ -32,6 +32,7 @@ jobs:
   deploy:
     needs: build  # Ensure that the build step runs first
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -46,6 +47,7 @@ jobs:
     - name: Set up Azure Publish Profile
       uses: Azure/webapps-deploy@v2
       with:
-        app-name: "AskWenBot2"  # This should be your Azure app name
-        publish-profile: ${{ secrets.AZUREAPP_SERVICE_PUBLISHPROFILE }}  # Use the secret for authentication
+        app-name: "AskWenBot2"  # Azure app name (replace with your app's name)
+        publish-profile: ${{ secrets.AZUREAPP_SERVICE_PUBLISHPROFILE }}  # Azure publish profile secret
         package: ./frontend  # Path to your frontend build directory
+
