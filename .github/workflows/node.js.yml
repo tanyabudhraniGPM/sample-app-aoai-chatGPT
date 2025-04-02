@@ -46,7 +46,7 @@ jobs:
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}  # Azure tenant ID
         client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}  # Azure client secret
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}  # Azure subscription ID
-        auth-type: 'service-principal'  # Use Service Principal for authentication
+        auth-type: 'SERVICE_PRINCIPAL'  # Corrected to uppercase
 
     - name: Set up Azure Publish Profile
       uses: Azure/webapps-deploy@v2
