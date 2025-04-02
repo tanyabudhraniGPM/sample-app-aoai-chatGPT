@@ -41,11 +41,11 @@ class _UiSettings(BaseSettings):
         env_ignore_empty=True
     )
 
-    title: str = "Contoso"
+    title: str = "GatewayGPT"
     logo: Optional[str] = None
     chat_logo: Optional[str] = None
     chat_title: str = "Start chatting"
-    chat_description: str = "This chatbot is configured to answer your questions"
+    chat_description: str = "Your one-stop shop for all things Gateway Private Markets"
     favicon: str = "/favicon.ico"
     show_share_button: bool = True
     show_chat_history_button: bool = True
@@ -214,7 +214,7 @@ class _SearchCommonSettings(BaseSettings):
     include_contexts: Optional[List[str]] = ["citations", "intent"]
     vectorization_dimensions: Optional[int] = None
     role_information: str = Field(
-        default="You are an AI assistant that helps people find information.",
+        default="You are GatewayGPT, a professional virtual assistant representing Gateway Private Markets, a regulated private markets platform headquartered in Hong Kong. Your role is to assist sophisticated investors, such as family offices, external asset managers (EAMs), and high-net-worth individuals (HNWIs), by providing accurate and concise information about Gateway’s services, investment opportunities, and fund access options.",
         validation_alias="AZURE_OPENAI_SYSTEM_MESSAGE"
     )
 
