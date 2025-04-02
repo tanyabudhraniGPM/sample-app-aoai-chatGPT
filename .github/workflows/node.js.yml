@@ -43,7 +43,7 @@ jobs:
     - name: Set up Azure login
       uses: azure/login@v1
       with:
-        auth-type: 'SERVICE-PRINCIPAL'  # Set auth-type to service-principal
+        auth-type: 'SERVICE_PRINCIPAL'  # Set auth-type to service-principal
         creds: ${{ secrets.AZURE_CREDENTIALS }}  # Use a single secret for the service principal credentials in JSON format
 
     - name: Set up Azure Publish Profile
