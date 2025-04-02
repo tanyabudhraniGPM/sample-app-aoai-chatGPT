@@ -32,22 +32,24 @@ jobs:
   deploy:
     needs: build  # Ensure that the build step runs first
     runs-on: ubuntu-latest
-
+    permissions:
+      id-token: write  # Add this line to ensure permission to get the ID token
+  
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
+  
+      - name: Set up Azure login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}  # Azure client ID
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}  # Azure tenant ID
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}  # Azure client secret
+  
+      - name: Set up Azure Publish Profile
+        uses: Azure/webapps-deploy@v2
+        with:
+          app-name: "AskWenBot2"  # This should be your Azure app name
+          publish-profile: ${{ secrets.AZUREAPP_SERVICE_PUBLISHPROFILE }}  # Use the secret for authentication
+          package: ./frontend  # Path to your frontend build directory
 
-    - name: Set up Azure login
-      uses: azure/login@v1
-      with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}  # Azure client ID
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}  # Azure tenant ID
-        client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}  # Azure client secret
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}  # Azure subscription ID
-
-    - name: Set up Azure Publish Profile
-      uses: Azure/webapps-deploy@v2
-      with:
-        app-name: "AskWenBot2"  # Azure app name (replace with your app's name)
-        publish-profile: ${{ secrets.AZUREAPP_SERVICE_PUBLISHPROFILE }}  # Azure publish profile secret
-        package: ./frontend  # Path to your frontend build directory
