@@ -36,6 +36,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Set up Azure login
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}  # Azure client ID
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}  # Azure tenant ID
+        client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}  # Azure client secret
+
     - name: Set up Azure Publish Profile
       uses: Azure/webapps-deploy@v2
       with:
