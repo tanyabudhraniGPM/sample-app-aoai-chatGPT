@@ -45,6 +45,7 @@ jobs:
       with:
         auth-type: 'SERVICE_PRINCIPAL'  # Set auth-type to service-principal
         creds: ${{ secrets.AZURE_CREDENTIALS }}  # Use a single secret for the service principal credentials in JSON format
+        tenant: ${{ secrets.AZURE_TENANT_ID }}  # Explicitly specify tenant ID from GitHub secrets
 
     - name: Set up Azure Publish Profile
       uses: Azure/webapps-deploy@v2
