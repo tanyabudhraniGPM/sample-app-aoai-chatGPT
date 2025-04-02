@@ -1,7 +1,4 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
-
-name: Build Frontend
+name: Build and Deploy Frontend to Azure
 
 on:
   push:
@@ -9,9 +6,8 @@ on:
   pull_request:
     branches: [ "main" ]
     
-
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -19,16 +15,32 @@ jobs:
     strategy:
       matrix:
         node-version: [14.x, 16.x, 18.x, 21.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
+    
     steps:
     - uses: actions/checkout@v3
+
+    # Set up Node.js with caching
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
         cache-dependency-path: '**/package-lock.json'
+    
+    # Install dependencies
     - run: npm ci
+    
+    # Build frontend
     - run: NODE_OPTIONS=--max_old_space_size=8192 npm run build --if-present
+
+    # Run tests (optional)
     - run: npm run test --if-present
+
+    # Deploy to Azure App Service
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: AskWenBot2  # 👈 your actual App Service name in Azure
+        slot-name: production  # 👈 use 'production' or your custom slot name
+        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}  # Add publish profile as secret
+        package: ./frontend/build  # Adjust this path if needed to point to the build output folder
