@@ -2,68 +2,52 @@ name: Build and Deploy to Azure
 
 on:
   push:
-    branches: [ "main" ]
-  workflow_dispatch:
-
-env:
-  AZURE_WEBAPP_NAME: AskWenBot2    # Replace with your application's name
-  AZURE_WEBAPP_PACKAGE_PATH: '.'      # Set this to the path to your web app project (defaults to repository root)
-  NODE_VERSION: '20.x'                # Set the Node.js version to use
-
-permissions:
-  contents: write
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v2
 
     - name: Set up Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v2
       with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
+        node-version: '16'  # Use Node.js version 16
 
-    - name: npm install, build, and test
-      run: |
-        npm install
-        npm run build --if-present
-        npm run test --if-present
+    - name: Install dependencies
+      run: npm ci
+      working-directory: frontend  # Set working directory to 'frontend' directory
 
-    - name: Upload artifact for deployment job
-      uses: actions/upload-artifact@v4
-      with:
-        name: node-app
-        path: .
+    - name: Build the project
+      run: NODE_OPTIONS=--max_old_space_size=8192 npm run build --if-present
+      working-directory: frontend  # Set working directory to 'frontend' directory
 
   deploy:
-    permissions:
-      contents: none
+    needs: build  # Ensure that the build step runs first
     runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'Development'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-    - name: Download artifact from build job
-      uses: actions/download-artifact@v4
-      with:
-        name: node-app
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-    - name: 'Set up Azure login'
+    - name: Set up Azure login
       uses: azure/login@v1
       with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}  # Azure client ID (configured in GitHub secrets)
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}  # Azure tenant ID (configured in GitHub secrets)
-        client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}  # Azure client secret (configured in GitHub secrets)
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}  # Azure subscription ID (configured in GitHub secrets)
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}  # Azure client ID
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}  # Azure tenant ID
+        client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}  # Azure client secret
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}  # Azure subscription ID
 
-    - name: 'Deploy to Azure WebApp'
-      id: deploy-to-webapp
-      uses: azure/webapps-deploy@v2
+    - name: Set up Azure Publish Profile
+      uses: Azure/webapps-deploy@v2
       with:
-        app-name: ${{ env.AZURE_WEBAPP_NAME }}  # Azure app name
-        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}  # Use Publish Profile stored in GitHub secrets
-        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}  # Path to your frontend directory (defaults to root)
+        app-name: "AskWenBot2"  # Azure app name (replace with your app's name)
+        publish-profile: ${{ secrets.AZUREAPP_SERVICE_PUBLISHPROFILE }}  # Azure publish profile secret
+        package: ./frontend  # Path to your frontend build directory
