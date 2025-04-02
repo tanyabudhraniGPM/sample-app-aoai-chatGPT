@@ -1,0 +1,41 @@
+name: Generate Env JSON
+
+on:
+  push:
+    branches:
+      - main  # Trigger when pushing to the main branch
+
+jobs:
+  generate-json:
+    runs-on: windows-latest  # Use Windows environment to run PowerShell commands
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    
+    - name: Set up PowerShell
+      uses: actions/setup-powershell@v2
+      
+    - name: Generate env.json from .env
+      shell: pwsh
+      run: |
+        # Ensure the .env file exists
+        if (Test-Path ".env") {
+            Get-Content .env | ForEach-Object {
+                if ($_ -match "(?<=name)[A-Z_]+(?=\=.*)") {
+                    [PSCustomObject]@{
+                        name  = $matches["name"]
+                        value = $matches["value"]
+                        slotSetting = $false
+                    }
+                }
+            } | ConvertTo-Json | Out-File -FilePath env.json
+        } else {
+            Write-Host ".env file not found."
+        }
+      
+    - name: Upload env.json as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: env-json-artifact
+        path: env.json
